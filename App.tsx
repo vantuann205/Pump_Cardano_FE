@@ -1,0 +1,85 @@
+import React, { useState, useMemo } from 'react';
+import Header from './components/Header';
+import KingOfTheHill from './components/KingOfTheHill';
+import CoinCard from './components/CoinCard';
+import CoinDetail from './components/CoinDetail';
+import CreateCoinPage from './components/CreateCoinPage';
+import FilterBar from './components/FilterBar';
+import { MOCK_COINS } from './services/mockData';
+import { Coin, ViewState, SortOption } from './types';
+
+const App: React.FC = () => {
+  const [viewState, setViewState] = useState<ViewState>(ViewState.GRID);
+  const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('featured');
+
+  const handleCoinClick = (coin: Coin) => {
+    setSelectedCoin(coin);
+    setViewState(ViewState.DETAIL);
+  };
+
+  const handleGoHome = () => {
+    setSelectedCoin(null);
+    setViewState(ViewState.GRID);
+  };
+
+  const handleGoCreate = () => {
+    setViewState(ViewState.CREATE);
+  };
+
+  const sortedCoins = useMemo(() => {
+    const coins = [...MOCK_COINS];
+    switch (sortOption) {
+      case 'marketCap':
+        return coins.sort((a, b) => b.marketCap - a.marketCap);
+      case 'creationTime':
+        return coins.sort((a, b) => b.createdAt - a.createdAt);
+      case 'lastReply':
+        return coins.sort((a, b) => b.lastReply - a.lastReply);
+      case 'featured':
+      default:
+        return coins; // Keep default order (mock data order)
+    }
+  }, [sortOption]);
+
+  return (
+    <div className="min-h-screen bg-pump-bg text-pump-text font-sans pb-20">
+      <Header onGoHome={handleGoHome} onGoCreate={handleGoCreate} />
+      
+      <main className="container mx-auto px-4 py-6">
+        {viewState === ViewState.GRID && (
+          <>
+            <KingOfTheHill coin={sortedCoins[0]} onClick={handleCoinClick} />
+            
+            <div className="mt-8">
+                <FilterBar currentSort={sortOption} onSortChange={setSortOption} />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {sortedCoins.map((coin) => (
+                    <CoinCard 
+                    key={coin.id} 
+                    coin={coin} 
+                    onClick={handleCoinClick} 
+                    />
+                ))}
+                </div>
+            </div>
+          </>
+        )}
+        
+        {viewState === ViewState.DETAIL && selectedCoin && (
+            <CoinDetail 
+              coin={selectedCoin} 
+              onBack={handleGoHome} 
+            />
+        )}
+
+        {viewState === ViewState.CREATE && (
+            <CreateCoinPage onCancel={handleGoHome} />
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default App;
