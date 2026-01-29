@@ -25,7 +25,9 @@ export interface Comment {
 export enum ViewState {
   GRID = 'GRID',
   DETAIL = 'DETAIL',
-  CREATE = 'CREATE'
+  CREATE = 'CREATE',
+  LIVESTREAMS = 'LIVESTREAMS',
+  SUPPORT = 'SUPPORT'
 }
 
 export interface Trade {

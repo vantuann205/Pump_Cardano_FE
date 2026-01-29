@@ -1,12 +1,26 @@
 import React from 'react';
-import { Wallet, Menu, Search, HelpCircle, LayoutGrid, PlusCircle } from 'lucide-react';
+import { Wallet, Menu, Search, HelpCircle, LayoutGrid, PlusCircle, Tv, LifeBuoy } from 'lucide-react';
+import { ToastMessage } from './Toast';
 
 interface HeaderProps {
   onGoHome: () => void;
   onGoCreate: () => void;
+  onGoLivestreams: () => void;
+  onGoSupport: () => void;
+  showToast: (type: ToastMessage['type'], title: string, message: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onGoHome, onGoCreate }) => {
+const Header: React.FC<HeaderProps> = ({ onGoHome, onGoCreate, onGoLivestreams, onGoSupport, showToast }) => {
+
+  const handleConnectWallet = () => {
+    // Simulate connection process
+    showToast('processing', 'Connecting Wallet', 'Looking for Nami or Eternl wallet...');
+    
+    setTimeout(() => {
+        showToast('success', 'Wallet Connected Successfully', 'Connected to addr1...xyz');
+    }, 1500);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-pump-bg/95 backdrop-blur supports-[backdrop-filter]:bg-pump-bg/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -24,12 +38,18 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, onGoCreate }) => {
                 </div>
             </div>
 
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <nav className="hidden xl:flex items-center gap-6 text-sm font-medium">
                 <button onClick={onGoHome} className="flex items-center gap-2 text-white hover:text-blue-400 transition-colors">
                     <LayoutGrid className="w-4 h-4" /> Board
                 </button>
+                <button onClick={onGoLivestreams} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                    <Tv className="w-4 h-4" /> Livestreams
+                </button>
                 <button onClick={onGoCreate} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                     <PlusCircle className="w-4 h-4" /> Start Coin
+                </button>
+                <button onClick={onGoSupport} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                    <LifeBuoy className="w-4 h-4" /> Support
                 </button>
                 <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                     <HelpCircle className="w-4 h-4" /> Hydra Docs
@@ -51,14 +71,22 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, onGoCreate }) => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+            <div className="hidden md:flex xl:hidden items-center gap-2">
+                 <button onClick={onGoCreate} className="flex items-center gap-2 text-gray-400 hover:text-white text-sm font-bold mr-2">
+                    <PlusCircle className="w-4 h-4" /> Start
+                </button>
+            </div>
             <div className="flex items-center gap-2 bg-pump-card border border-gray-800 rounded p-1 pl-3 pr-1">
                 <span className="text-xs font-mono text-gray-400 hidden md:block">0 ₳</span>
-                <button className="flex items-center gap-2 rounded bg-gray-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-gray-700 transition-colors">
+                <button 
+                    onClick={handleConnectWallet}
+                    className="flex items-center gap-2 rounded bg-gray-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-gray-700 transition-colors"
+                >
                     <Wallet className="h-3 w-3" />
                     <span>connect wallet</span>
                 </button>
             </div>
-            <button className="md:hidden p-2 text-gray-400 hover:text-white">
+            <button className="xl:hidden p-2 text-gray-400 hover:text-white">
                 <Menu className="h-6 w-6" />
             </button>
         </div>

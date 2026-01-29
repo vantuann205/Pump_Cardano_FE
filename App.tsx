@@ -4,7 +4,10 @@ import KingOfTheHill from './components/KingOfTheHill';
 import CoinCard from './components/CoinCard';
 import CoinDetail from './components/CoinDetail';
 import CreateCoinPage from './components/CreateCoinPage';
+import LivestreamsPage from './components/LivestreamsPage';
+import SupportPage from './components/SupportPage';
 import FilterBar from './components/FilterBar';
+import Toast, { ToastMessage } from './components/Toast';
 import { MOCK_COINS } from './services/mockData';
 import { Coin, ViewState, SortOption } from './types';
 
@@ -12,6 +15,17 @@ const App: React.FC = () => {
   const [viewState, setViewState] = useState<ViewState>(ViewState.GRID);
   const [selectedCoin, setSelectedCoin] = useState<Coin | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('featured');
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Toast Handler
+  const addToast = (type: ToastMessage['type'], title: string, message: string) => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, type, title, message }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleCoinClick = (coin: Coin) => {
     setSelectedCoin(coin);
@@ -25,6 +39,14 @@ const App: React.FC = () => {
 
   const handleGoCreate = () => {
     setViewState(ViewState.CREATE);
+  };
+
+  const handleGoLivestreams = () => {
+    setViewState(ViewState.LIVESTREAMS);
+  };
+
+  const handleGoSupport = () => {
+    setViewState(ViewState.SUPPORT);
   };
 
   const sortedCoins = useMemo(() => {
@@ -43,8 +65,21 @@ const App: React.FC = () => {
   }, [sortOption]);
 
   return (
-    <div className="min-h-screen bg-pump-bg text-pump-text font-sans pb-20">
-      <Header onGoHome={handleGoHome} onGoCreate={handleGoCreate} />
+    <div className="min-h-screen bg-pump-bg text-pump-text font-sans pb-20 relative">
+      <Header 
+        onGoHome={handleGoHome} 
+        onGoCreate={handleGoCreate} 
+        onGoLivestreams={handleGoLivestreams}
+        onGoSupport={handleGoSupport}
+        showToast={addToast}
+      />
+      
+      {/* Toast Container */}
+      <div className="fixed top-20 right-4 z-[100] flex flex-col gap-2 w-full max-w-sm pointer-events-none">
+        {toasts.map((toast) => (
+            <Toast key={toast.id} toast={toast} onClose={removeToast} />
+        ))}
+      </div>
       
       <main className="container mx-auto px-4 py-6">
         {viewState === ViewState.GRID && (
@@ -70,12 +105,21 @@ const App: React.FC = () => {
         {viewState === ViewState.DETAIL && selectedCoin && (
             <CoinDetail 
               coin={selectedCoin} 
-              onBack={handleGoHome} 
+              onBack={handleGoHome}
+              showToast={addToast}
             />
         )}
 
         {viewState === ViewState.CREATE && (
             <CreateCoinPage onCancel={handleGoHome} />
+        )}
+
+        {viewState === ViewState.LIVESTREAMS && (
+            <LivestreamsPage />
+        )}
+
+        {viewState === ViewState.SUPPORT && (
+            <SupportPage />
         )}
       </main>
     </div>

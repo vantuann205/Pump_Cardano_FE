@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Coin, Comment } from '../types';
+import React, { useEffect, useState, useRef } from 'react';
+import { Coin, Comment, Trade } from '../types';
 import TradingChart from './TradingChart';
 import TradeForm from './TradeForm';
 import CommentSection from './CommentSection';
@@ -7,19 +7,24 @@ import TransactionTable from './TransactionTable';
 import BondingCurve from './BondingCurve';
 import TokenInfoBar from './TokenInfoBar';
 import HoldersList from './HoldersList';
-import { MOCK_COMMENTS, MOCK_TRADES } from '../services/mockData';
+import { MOCK_COMMENTS } from '../services/mockData';
 import { generateCoinAnalysis } from '../services/geminiService';
 import { ArrowLeft, Sparkles, AlertTriangle } from 'lucide-react';
+import { ToastMessage } from './Toast';
 
 interface CoinDetailProps {
   coin: Coin;
   onBack: () => void;
+  showToast: (type: ToastMessage['type'], title: string, message: string) => void;
 }
 
-const CoinDetail: React.FC<CoinDetailProps> = ({ coin, onBack }) => {
+const CoinDetail: React.FC<CoinDetailProps> = ({ coin, onBack, showToast }) => {
   const [comments, setComments] = useState<Comment[]>(MOCK_COMMENTS);
   const [analysis, setAnalysis] = useState<string>('');
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  
+  // Live Trades State
+  const [liveTrades, setLiveTrades] = useState<Trade[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -30,7 +35,40 @@ const CoinDetail: React.FC<CoinDetailProps> = ({ coin, onBack }) => {
         setLoadingAnalysis(false);
     };
     fetchAnalysis();
+
+    // Initial dummy trades
+    const initialTrades: Trade[] = [];
+    const now = Date.now();
+    for(let i=0; i<5; i++) {
+        initialTrades.push({
+            type: Math.random() > 0.5 ? 'buy' : 'sell',
+            amount: Math.random() * 500 + 10,
+            price: 0.45 + (Math.random() * 0.05 - 0.025),
+            timestamp: (now - i * 5000).toString(),
+            user: `addr1...${Math.random().toString(36).substring(7, 10)}`
+        });
+    }
+    setLiveTrades(initialTrades);
+
   }, [coin]);
+
+  // Effect to simulate live random trades
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const isBuy = Math.random() > 0.4; // Slightly more buys
+        const newTrade: Trade = {
+            type: isBuy ? 'buy' : 'sell',
+            amount: Math.random() * 200 + 10,
+            price: 0.45 + (Math.random() * 0.02 - 0.01),
+            timestamp: Date.now().toString(),
+            user: `addr1...${Math.random().toString(36).substring(7, 10)}`
+        };
+
+        setLiveTrades(prev => [newTrade, ...prev].slice(0, 20)); // Keep last 20
+    }, 2000); // New trade every 2 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddComment = (text: string) => {
     const newComment: Comment = {
@@ -97,12 +135,12 @@ const CoinDetail: React.FC<CoinDetailProps> = ({ coin, onBack }) => {
                 </div>
             </div>
 
-            <TransactionTable trades={MOCK_TRADES} />
+            <TransactionTable trades={liveTrades} />
         </div>
 
         {/* Right Column: Trade Form & Chat */}
         <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-            <TradeForm coin={coin} />
+            <TradeForm coin={coin} showToast={showToast} />
             <CommentSection comments={comments} onAddComment={handleAddComment} />
         </div>
       </div>

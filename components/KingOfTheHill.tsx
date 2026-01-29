@@ -8,8 +8,10 @@ interface KingOfTheHillProps {
 }
 
 const KingOfTheHill: React.FC<KingOfTheHillProps> = ({ coin, onClick }) => {
+  const amountInCurve = (42000 * (coin.bondingCurveProgress / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
   return (
-    <div className="mb-8 w-full">
+    <div className="mb-8 w-full animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Crown className="text-yellow-400 w-6 h-6 animate-bounce" />
         <h2 className="text-xl font-bold text-yellow-400">King of the Hill</h2>
@@ -31,16 +33,19 @@ const KingOfTheHill: React.FC<KingOfTheHillProps> = ({ coin, onClick }) => {
                 <p className="text-gray-300 max-w-2xl">{coin.description}</p>
                 
                 <div className="mt-4 w-full max-w-md">
-                   <div className="flex justify-between text-sm text-yellow-400 mb-1">
-                        <span>Progress to Raydium</span>
+                   <div className="flex justify-between text-sm text-yellow-400 mb-1 font-bold">
+                        <span className="uppercase">Bonding Curve Progress</span>
                         <span>{coin.bondingCurveProgress}%</span>
                    </div>
-                   <div className="h-4 bg-gray-800 rounded-full overflow-hidden border border-yellow-400/30">
+                   <div className="h-4 bg-gray-800 rounded-full overflow-hidden border border-yellow-400/30 mb-2">
                         <div 
                             className="h-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" 
                             style={{ width: `${coin.bondingCurveProgress}%` }}
                         />
                    </div>
+                   <p className="text-xs text-yellow-500/70 font-medium">
+                        There are {amountInCurve} ₳ in the bonding curve
+                   </p>
                 </div>
             </div>
         </div>

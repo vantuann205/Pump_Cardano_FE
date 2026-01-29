@@ -2,18 +2,36 @@ import React, { useState } from 'react';
 import { Coin } from '../types';
 import { Settings, Wallet } from 'lucide-react';
 import SettingsModal from './SettingsModal';
+import { ToastMessage } from './Toast';
 
 interface TradeFormProps {
   coin: Coin;
+  showToast: (type: ToastMessage['type'], title: string, message: string) => void;
 }
 
-const TradeForm: React.FC<TradeFormProps> = ({ coin }) => {
+const TradeForm: React.FC<TradeFormProps> = ({ coin, showToast }) => {
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [amount, setAmount] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const mockPrice = coin.priceHistory[coin.priceHistory.length - 1]?.price || 0.45;
   const calculatedTokens = amount ? (parseFloat(amount) / mockPrice).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0.00';
+
+  const handleTrade = () => {
+    if (!amount) {
+        showToast('error', 'Trade Failed', 'Please enter an amount to trade.');
+        return;
+    }
+
+    // Processing Toast
+    showToast('processing', 'Processing Transaction', 'Interacting with Hydra L2 Smart Contract...');
+
+    setTimeout(() => {
+        // Mock Success
+        showToast('success', 'Transaction Successful', `${mode === 'buy' ? 'Bought' : 'Sold'} ${calculatedTokens} ${coin.ticker}`);
+        setAmount('');
+    }, 2000);
+  };
 
   return (
     <>
@@ -129,6 +147,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ coin }) => {
 
         {/* Submit Button */}
         <button 
+            onClick={handleTrade}
             className={`w-full py-4 rounded-lg text-lg font-bold uppercase tracking-wide transition-all transform active:scale-95 ${
                 mode === 'buy' 
                 ? 'bg-pump-green hover:bg-green-400 text-black shadow-[0_0_20px_rgba(74,222,128,0.2)]' 
